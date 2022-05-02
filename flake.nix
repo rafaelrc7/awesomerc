@@ -18,11 +18,12 @@
 
     dotfiles = { config, ... }: {
       xdg.configFile = {
-      "awesome/rc.lua".source = ./rc.lua;
-      "awesome/lua".source = ./lua;
-      "awesome/lain".source = lain;
-      "awesome/freedesktop".source = awesome-freedesktop;
+        "awesome/rc.lua".source = ./rc.lua;
+        "awesome/lua".source = ./lua;
+        "awesome/lain".source = lain;
+        "awesome/freedesktop".source = awesome-freedesktop;
       };
     };
   };
 }
+
