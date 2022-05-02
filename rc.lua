@@ -22,11 +22,6 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
-package.path = package.path .. ";" .. gears.filesystem.get_configuration_dir() .. "lua/?"
-
-local freedesktop = require("freedesktop")
-local lain = require("lain")
-
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -38,6 +33,15 @@ naughty.connect_signal("request::display_error", function(message, startup)
     }
 end)
 -- }}}
+
+package.path = package.path .. ";"
+	.. gears.filesystem.get_configuration_dir() .. "lua/?.lua;"
+	.. gears.filesystem.get_configuration_dir() .. "lua/?/init.lua;"
+
+local freedesktop = require("freedesktop")
+local lain = require("lain")
+
+local widgets = require("widgets")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
@@ -55,176 +59,23 @@ local editor_cmd = term_exec(editor)
 local browser = os.getenv("BROWSER") or "librewolf"
 local explorer = os.getenv("EXPLORER") or "pcmanfm"
 
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
-local SUPER = "Mod4"
-local ALT = "Mod1"
-local modkey = SUPER
--- }}}
-
--- {{{ Menu
--- Create a launcher widget and a main menu
-local awesomemenu = {
-   { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-   { "manual", term_exec("man awesome") },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", function() awesome.quit() end },
-}
-
-local mainmenu = freedesktop.menu.build {
-    before = {
-        { "Awesome", awesomemenu, beautiful.awesome_icon },
-    },
-    after = {
-        { "Terminal", terminal },
-    }
-}
-
-local launcher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mainmenu })
-
--- Menubar configuration
-menubar.utils.terminal = terminal -- Set the terminal for applications that require it
--- }}}
-
--- {{{ Tag layout
--- Table of layouts to cover with awful.layout.inc, order matters.
-tag.connect_signal("request::default_layouts", function()
-    awful.layout.append_default_layouts({
-        awful.layout.suit.tile,
-        awful.layout.suit.tile.top,
-        awful.layout.suit.fair,
-        awful.layout.suit.fair.horizontal,
-        awful.layout.suit.spiral,
-        awful.layout.suit.floating,
-    })
-end)
--- }}}
-
--- {{{ Wallpaper
-screen.connect_signal("request::wallpaper", function(s)
-    awful.wallpaper {
-        screen = s,
-        widget = {
-            {
-                image     = beautiful.wallpaper,
-                upscale   = true,
-                downscale = true,
-                widget    = wibox.widget.imagebox,
-            },
-            valign = "center",
-            halign = "center",
-            tiled  = false,
-            widget = wibox.container.tile,
-        }
-    }
-end)
--- }}}
-
--- {{{ Wibar
-
--- Keyboard map indicator and switcher
-local keyboardlayout = awful.widget.keyboardlayout()
-
--- Create a textclock widget
-local textclock = wibox.widget.textclock()
-
-screen.connect_signal("request::desktop_decoration", function(s)
-    -- Each screen has its own tag table.
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-
-    -- Create a promptbox for each screen
-    s.mypromptbox = awful.widget.prompt()
-
-    -- Create an imagebox widget which will contain an icon indicating which layout we're using.
-    -- We need one layoutbox per screen.
-    s.mylayoutbox = awful.widget.layoutbox {
-        screen  = s,
-        buttons = {
-            awful.button({ }, 1, function() awful.layout.inc( 1) end),
-            awful.button({ }, 3, function() awful.layout.inc(-1) end),
-            awful.button({ }, 4, function() awful.layout.inc(-1) end),
-            awful.button({ }, 5, function() awful.layout.inc( 1) end),
-        }
-    }
-
-    -- Create a taglist widget
-    s.mytaglist = awful.widget.taglist {
-        screen  = s,
-        filter  = awful.widget.taglist.filter.all,
-        buttons = {
-            awful.button({ }, 1, function(t) t:view_only() end),
-            awful.button({ modkey }, 1, function(t)
-                                            if client.focus then
-                                                client.focus:move_to_tag(t)
-                                            end
-                                        end),
-            awful.button({ }, 3, awful.tag.viewtoggle),
-            awful.button({ modkey }, 3, function(t)
-                                            if client.focus then
-                                                client.focus:toggle_tag(t)
-                                            end
-                                        end),
-            awful.button({ }, 4, function(t) awful.tag.viewprev(t.screen) end),
-            awful.button({ }, 5, function(t) awful.tag.viewnext(t.screen) end),
-        }
-    }
-
-    -- Create a tasklist widget
-    s.mytasklist = awful.widget.tasklist {
-        screen  = s,
-        filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = {
-            awful.button({ }, 1, function (c)
-                c:activate { context = "tasklist", action = "toggle_minimization" }
-            end),
-            awful.button({ }, 3, function() awful.menu.client_list { theme = { width = 250 } } end),
-            awful.button({ }, 4, function() awful.client.focus.byidx(-1) end),
-            awful.button({ }, 5, function() awful.client.focus.byidx( 1) end),
-        }
-    }
-
-    -- Create the wibox
-    s.mywibox = awful.wibar {
-        position = "top",
-        screen   = s,
-        widget   = {
-            layout = wibox.layout.align.horizontal,
-            { -- Left widgets
-                layout = wibox.layout.fixed.horizontal,
-                launcher,
-                s.mytaglist,
-                s.mypromptbox,
-            },
-            s.mytasklist, -- Middle widget
-            { -- Right widgets
-                layout = wibox.layout.fixed.horizontal,
-                keyboardlayout,
-                wibox.widget.systray(),
-                textclock,
-                s.mylayoutbox,
-            },
-        }
-    }
-end)
--- }}}
-
 -- {{{ Mouse bindings
 awful.mouse.append_global_mousebindings({
-    awful.button({ }, 3, function() mainmenu:toggle() end),
+    awful.button({ }, 3, function() widgets.mainmenu:toggle() end),
 })
 -- }}}
+
+require "signals"
+
 -- {{{ Key bindings
+
+local modkey = "Mod4"
 
 -- General Awesome keys
 awful.keyboard.append_global_keybindings({
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
-    awful.key({ modkey,           }, "w", function () mainmenu:show() end,
+    awful.key({ modkey,           }, "w", function () widgets.mainmenu:show() end,
               {description = "show main menu", group = "awesome"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
