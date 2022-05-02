@@ -22,7 +22,7 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
-package.path = gears.filesystem.get_configuration_dir() .. "/lua;" .. package.path
+package.path = package.path .. ";" .. gears.filesystem.get_configuration_dir() .. "lua/?"
 
 local freedesktop = require("freedesktop")
 local lain = require("lain")

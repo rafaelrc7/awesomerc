@@ -20,6 +20,7 @@
       xdg.configFile = {
         "awesome/rc.lua".source = ./rc.lua;
         "awesome/lua".source = ./lua;
+        "awesome/themes".source = ./themes;
         "awesome/lain".source = lain;
         "awesome/freedesktop".source = awesome-freedesktop;
       };
