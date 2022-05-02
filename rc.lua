@@ -1,6 +1,7 @@
 -- awesome_mode: api-level=4:screen=on
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
+
 pcall(require, "luarocks.loader")
 
 -- Standard awesome library
@@ -21,6 +22,8 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
+package.path = gears.filesystem.get_configuration_dir() .. "/lua;" .. package.path
+
 local freedesktop = require("freedesktop")
 local lain = require("lain")
 
@@ -38,10 +41,9 @@ end)
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-local theme_path = string.format("%s/awesome/themes/", os.getenv("XDG_CONFIG_HOME"))
+local theme_path = string.format("%s/themes/", gears.filesystem.get_configuration_dir())
 
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
---beautiful.init(theme_path .. "default/theme.lua")
+beautiful.init(theme_path .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 local terminal = os.getenv("TERMINAL") or "kitty"
@@ -102,18 +104,6 @@ tag.connect_signal("request::default_layouts", function()
     })
 end)
 -- }}}
-
--- No borders when only one non-floating or maximised client
-screen.connect_signal("arrange", function(s)
-    local only_one = #s.tiled_clients == 1
-    for _, c in pairs(s.clients) do
-        if only_one and not c.floating or c.maximized then
-            c.border_width = 0
-        else
-            c.border_width = beautiful.border_width
-        end
-    end
-end)
 
 -- {{{ Wallpaper
 screen.connect_signal("request::wallpaper", function(s)
@@ -228,7 +218,6 @@ awful.mouse.append_global_mousebindings({
     awful.button({ }, 3, function() mainmenu:toggle() end),
 })
 -- }}}
-
 -- {{{ Key bindings
 
 -- General Awesome keys
@@ -465,6 +454,7 @@ end)
 -- }}}
 
 -- {{{ Rules
+
 -- Rules to apply to new clients.
 ruled.client.connect_signal("request::rules", function()
     -- All clients will match this rule.
@@ -558,12 +548,11 @@ end)
 -- Keep floating clients on top and give them titlebars
 client.connect_signal("property::floating", function(c)
     if c.fullscreen then return end;
+    c.ontop = c.floating;
     if c.floating then
         awful.titlebar.show(c)
-        c.ontop = true;
     else
         awful.titlebar.hide(c)
-        c.ontop = false;
     end
 end)
 
@@ -578,6 +567,124 @@ tag.connect_signal("property::layout", function(t)
     end
 end)
 
+-- No borders when only one non-floating or maximised client
+screen.connect_signal("arrange", function(s)
+    local only_one = #s.tiled_clients == 1
+    for _, c in pairs(s.clients) do
+        if only_one and not c.floating or c.maximized then
+            c.border_width = 0
+        else
+            c.border_width = beautiful.border_width
+        end
+    end
+end)
+
+-- No Useless gaps on the corners
+-- Thanks to u/TehGritz
+local set_outside_padding = function(s, amount)
+    if beautiful.fixed_outside_gap then
+        s.padding = {
+            left = amount,
+            right = amount,
+            top = amount,
+            bottom = amount
+        }
+    end
+end
+
+local update_spacing_by_screen = function(s)
+    for _,t in pairs(s.selected_tags) do --iterate through all selected tags first
+        if t.gap == 0 or t.layout.name == "max" then -- what happens if tag gaps are 0 or a layout we have selected has maximized gaps
+            set_outside_padding(s, 0)
+            return false
+        end
+    end
+    if #s.tiled_clients == 1 or #s.clients == 0 then  -- what happens if only one tiled client is visible or if NO clients are visible
+        set_outside_padding(s, 0)
+        return false
+    else --we must iterate through clients on screen to determine what to do
+        for _,c in pairs(s.clients) do
+            if c.maximized or c.ontop or c.maximized_vertical or c.maximized_horizontal or c.fullscreen then --when outside padding should be reset
+                set_outside_padding(s, 0)
+                return false
+            end
+        end
+        -- If we reach this point, that means none of the visible clients were in a state that should prevent the negative padding from being set
+        set_outside_padding(s,
+            (-(s.selected_tag.gap*2)+beautiful.fixed_outside_gap_amount) or 0)
+        return true
+    end
+end
+
+tag.connect_signal("property::useless_gap", function(t)
+    if t.gap == 0 or beautiful.fixed_outside_gap then -- note that it affects the smoothness of the gap scrolling with mousewheel if we enable fixed_outside_gap, since it has to do the function above for every click of the scroll wheel
+        update_spacing_by_screen(t.screen)
+    end
+end)
+
+-- When a tag is active and can be used
+tag.connect_signal("property::activated", function(t)
+    update_spacing_by_screen(t.screen)
+end)
+
+-- When a client is sent away from a tag
+tag.connect_signal("untagged", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a tag is selected
+tag.connect_signal("property::selected", function(t)
+    update_spacing_by_screen(t.screen)
+end)
+
+-- When a new client appears
+client.connect_signal( "manage", function(c)
+    if awesome.startup and not c.size_hints.user_position and not c.size_hints.program_position then -- Prevent clients from being unreachable after screen count changes.
+        awful.placement.no_offscreen(c)
+    end
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)maximized
+client.connect_signal("property::maximized", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)fullscreened
+client.connect_signal("property::fullscreen", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)minimized
+client.connect_signal("property::minimized", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)hidden
+client.connect_signal("property:hidden", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client's (un)floated
+client.connect_signal("property::floating", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)maximized vertically
+client.connect_signal("property::maximized_vertical", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client is (un)maximized horizontally
+client.connect_signal("property::maximized_horizontal", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
+-- When a client requests a new screen, and update the old_screen while we're at it
+client.connect_signal("property::screen", function(c, old_screen)
+    update_spacing_by_screen(c.screen)
+    if old_screen then update_spacing_by_screen(old_screen) end
+end)
 -- {{{ Notifications
 
 ruled.notification.connect_signal('request::rules', function()
@@ -602,6 +709,6 @@ client.connect_signal("mouse::enter", function(c)
     c:activate { context = "mouse_enter", raise = false }
 end)
 
-local autorun_path = string.format("%s/awesome/autorun.sh", os.getenv("XDG_CONFIG_HOME"))
+local autorun_path = string.format("%s/awesome/autorun.sh", gears.filesystem.get_configuration_dir())
 awful.spawn.with_shell(string.format([[[-e %s] && %s]], autorun_path, autorun_path))
 
