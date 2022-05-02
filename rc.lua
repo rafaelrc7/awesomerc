@@ -34,6 +34,9 @@ naughty.connect_signal("request::display_error", function(message, startup)
 end)
 -- }}}
 
+local theme_path = string.format("%s/themes/", gears.filesystem.get_configuration_dir())
+beautiful.init(theme_path .. "default/theme.lua")
+
 package.path = package.path .. ";"
 	.. gears.filesystem.get_configuration_dir() .. "lua/?.lua;"
 	.. gears.filesystem.get_configuration_dir() .. "lua/?/init.lua;"
@@ -45,19 +48,6 @@ local widgets = require("widgets")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-local theme_path = string.format("%s/themes/", gears.filesystem.get_configuration_dir())
-
-beautiful.init(theme_path .. "default/theme.lua")
-
--- This is used later as the default terminal and editor to run.
-local terminal = os.getenv("TERMINAL") or "kitty"
-local term_exec = function(cmd)
-    return string.format([[%s -- %s]], terminal, cmd)
-end
-local editor = os.getenv("EDITOR") or "vim"
-local editor_cmd = term_exec(editor)
-local browser = os.getenv("BROWSER") or "librewolf"
-local explorer = os.getenv("EXPLORER") or "pcmanfm"
 
 -- {{{ Mouse bindings
 awful.mouse.append_global_mousebindings({
@@ -65,7 +55,9 @@ awful.mouse.append_global_mousebindings({
 })
 -- }}}
 
+require "rules"
 require "signals"
+local apps = require "config.apps"
 
 -- {{{ Key bindings
 
@@ -85,15 +77,15 @@ awful.keyboard.append_global_keybindings({
               function ()
                   awful.prompt.run {
                     prompt       = "Run Lua code: ",
-                    textbox      = awful.screen.focused().mypromptbox.widget,
+                    textbox      = awful.screen.focused().promptbox.widget,
                     exe_callback = awful.util.eval,
                     history_path = awful.util.get_cache_dir() .. "/history_eval"
                   }
               end,
               {description = "lua execute prompt", group = "awesome"}),
-    awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
+    awful.key({ modkey,           }, "Return", function () awful.spawn(apps.terminal) end,
               {description = "open a terminal", group = "launcher"}),
-    awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
+    awful.key({ modkey },            "r",     function () awful.screen.focused().promptbox:run() end,
               {description = "run prompt", group = "launcher"}),
     awful.key({ modkey }, "p", function() menubar.show() end,
               {description = "show the menubar", group = "launcher"}),
@@ -304,132 +296,6 @@ end)
 
 -- }}}
 
--- {{{ Rules
-
--- Rules to apply to new clients.
-ruled.client.connect_signal("request::rules", function()
-    -- All clients will match this rule.
-    ruled.client.append_rule {
-        id         = "global",
-        rule       = { },
-        properties = {
-            focus     = awful.client.focus.filter,
-            raise     = true,
-            screen    = awful.screen.preferred,
-            placement = awful.placement.no_overlap+awful.placement.no_offscreen
-        }
-    }
-
-    -- Floating clients.
-    ruled.client.append_rule {
-        id       = "floating",
-        rule_any = {
-            instance = { "copyq", "pinentry" },
-            class    = {
-                "Arandr", "Blueman-manager", "Gpick", "Kruler", "Sxiv",
-                "Tor Browser", "Wpa_gui", "veromix", "xtightvncviewer"
-            },
-            -- Note that the name property shown in xprop might be set slightly after creation of the client
-            -- and the name shown there might not match defined rules here.
-            name    = {
-                "Event Tester",  -- xev.
-            },
-            role    = {
-                "AlarmWindow",    -- Thunderbird's calendar.
-                "ConfigManager",  -- Thunderbird's about:config.
-                "pop-up",         -- e.g. Google Chrome's (detached) Developer Tools.
-            }
-        },
-        properties = { floating = true }
-    }
-
-    -- Add titlebars to normal clients and dialogs
-    ruled.client.append_rule {
-        id         = "titlebars",
-        rule_any   = { type = { "normal", "dialog" } },
-        properties = { titlebars_enabled = false }
-    }
-
-    -- Set Firefox to always map on the tag named "2" on screen 1.
-    -- ruled.client.append_rule {
-    --     rule       = { class = "Firefox"     },
-    --     properties = { screen = 1, tag = "2" }
-    -- }
-end)
-
--- }}}
-
--- {{{ Titlebars
--- Add a titlebar if titlebars_enabled is set to true in the rules.
-client.connect_signal("request::titlebars", function(c)
-    -- buttons for the titlebar
-    local buttons = {
-        awful.button({ }, 1, function()
-            c:activate { context = "titlebar", action = "mouse_move"  }
-        end),
-        awful.button({ }, 3, function()
-            c:activate { context = "titlebar", action = "mouse_resize"}
-        end),
-    }
-
-    awful.titlebar(c).widget = {
-        { -- Left
-            awful.titlebar.widget.iconwidget(c),
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-        },
-        { -- Middle
-            { -- Title
-                align  = "center",
-                widget = awful.titlebar.widget.titlewidget(c)
-            },
-            buttons = buttons,
-            layout  = wibox.layout.flex.horizontal
-        },
-        { -- Right
-            awful.titlebar.widget.minimizebutton(c),
-            awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.closebutton    (c),
-            layout = wibox.layout.fixed.horizontal()
-        },
-        layout = wibox.layout.align.horizontal
-    }
-end)
-
--- Keep floating clients on top and give them titlebars
-client.connect_signal("property::floating", function(c)
-    if c.fullscreen then return end;
-    c.ontop = c.floating;
-    if c.floating then
-        awful.titlebar.show(c)
-    else
-        awful.titlebar.hide(c)
-    end
-end)
-
--- Show titlebars on all clients when in floating layout
-tag.connect_signal("property::layout", function(t)
-    for _, c in pairs (t:clients()) do
-        if t.layout == awful.layout.suit.floating then
-            awful.titlebar.show(c)
-        elseif not c.floating then
-            awful.titlebar.hide(c)
-        end
-    end
-end)
-
--- No borders when only one non-floating or maximised client
-screen.connect_signal("arrange", function(s)
-    local only_one = #s.tiled_clients == 1
-    for _, c in pairs(s.clients) do
-        if only_one and not c.floating or c.maximized then
-            c.border_width = 0
-        else
-            c.border_width = beautiful.border_width
-        end
-    end
-end)
-
 -- No Useless gaps on the corners
 -- Thanks to u/TehGritz
 local set_outside_padding = function(s, amount)
@@ -455,7 +321,7 @@ local update_spacing_by_screen = function(s)
         return false
     else --we must iterate through clients on screen to determine what to do
         for _,c in pairs(s.clients) do
-            if c.maximized or c.ontop or c.maximized_vertical or c.maximized_horizontal or c.fullscreen then --when outside padding should be reset
+            if c.maximized or (c.ontop and not c.floating) or c.maximized_vertical or c.maximized_horizontal or c.fullscreen then --when outside padding should be reset
                 set_outside_padding(s, 0)
                 return false
             end
@@ -535,29 +401,6 @@ end)
 client.connect_signal("property::screen", function(c, old_screen)
     update_spacing_by_screen(c.screen)
     if old_screen then update_spacing_by_screen(old_screen) end
-end)
--- {{{ Notifications
-
-ruled.notification.connect_signal('request::rules', function()
-    -- All notifications will match this rule.
-    ruled.notification.append_rule {
-        rule       = { },
-        properties = {
-            screen           = awful.screen.preferred,
-            implicit_timeout = 5,
-        }
-    }
-end)
-
-naughty.connect_signal("request::display", function(n)
-    naughty.layout.box { notification = n }
-end)
-
--- }}}
-
--- Enable sloppy focus, so that focus follows mouse.
-client.connect_signal("mouse::enter", function(c)
-    c:activate { context = "mouse_enter", raise = false }
 end)
 
 local autorun_path = string.format("%s/awesome/autorun.sh", gears.filesystem.get_configuration_dir())
