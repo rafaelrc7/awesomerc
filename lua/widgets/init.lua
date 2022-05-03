@@ -6,6 +6,8 @@ local beautiful = require "beautiful"
 local wibox = require "wibox"
 
 local freedesktop = require "freedesktop"
+local lain = require "lain"
+local markup = lain.util.markup
 
 local apps = require "config.apps"
 local mod = require "bindings.mod"
@@ -33,7 +35,42 @@ _M.launcher = awful.widget.launcher {
 }
 
 _M.keyboardlayout = awful.widget.keyboardlayout()
-_M.textclock = wibox.widget.textclock()
+
+_M.textclock = awful.widget.watch(
+	[[date +"%a %d %b %T"]], 1,
+	function(widget, stdout)
+		widget:set_markup(" " .. markup.font(beautiful.font, stdout))
+	end
+)
+
+_M.bat = lain.widget.bat {
+	settings = function()
+		if bat_now.status and bat_now.status ~= "N/A" then
+			widget:set_markup(markup.font(beautiful.font, " " .. bat_now.perc .. "% "))
+		else
+			widget:set_markup(markup.font(beautiful.font, " AC "))
+		end
+	end
+}
+
+_M.cal = lain.widget.cal { attach_to = {_M.textclock} }
+_M.cpu = lain.widget.cpu {
+	settings = function()
+		widget:set_markup(markup.font(beautiful.font, " " .. cpu_now.usage .. "% "))
+	end
+}
+
+_M.mem = lain.widget.mem {
+	settings = function()
+		widget:set_markup(markup.font(beautiful.font, " " .. mem_now.used .. "MB "))
+	end
+}
+
+_M.temp = lain.widget.temp {
+	settings = function()
+		widget:set_markup(markup.font(beautiful.font, " " .. coretemp_now .. "°C "))
+	end
+}
 
 _M.create_promptbox = function() return awful.widget.prompt() end
 
@@ -128,7 +165,7 @@ _M.create_tasklist = function(s)
 				modifiers = {},
 				button = 3,
 				on_press = function()
-					awful.menu.client_list {theme = {width = 250}}
+					awful.menu.client_list {beautiful = {width = 250}}
 				end,
 			},
 			awful.button {
@@ -165,6 +202,10 @@ _M.create_wibox = function(s)
 				layout = wibox.layout.fixed.horizontal,
 				_M.keyboardlayout,
 				wibox.widget.systray(),
+				_M.temp,
+				_M.cpu,
+				_M.mem,
+				_M.bat,
 				_M.textclock,
 				s.layoutbox,
 			},
