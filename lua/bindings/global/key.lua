@@ -59,7 +59,7 @@ awful.keyboard.append_global_keybindings {
 	-- LAUNCHER --
 
 	awful.key {
-		modifiers	= { mod.super },
+		modifiers	= { mod.super, mod.shift },
 		key			= "Return",
 		description	= "open a terminal",
 		group		= "launcher",
