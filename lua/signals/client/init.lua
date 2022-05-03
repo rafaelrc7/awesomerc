@@ -51,20 +51,16 @@ end)
 
 -- Keep floating clients on top and give them titlebars
 client.connect_signal("property::floating", function(c)
-	if c.fullscreen then return end;
+	if c.fullscreen or c.maximized then
+		awful.titlebar.hide(c)
+		return
+	end
+
 	c.ontop = c.floating
 	if c.floating then
 		awful.titlebar.show(c)
 	else
 		awful.titlebar.hide(c)
-	end
-end)
-
-client.connect_signal("property::maximized", function(c)
-	if c.maximized then
-		--awful.titlebar.hide(c)
-	elseif c.floating then
-		--awful.titlebar.show(c)
 	end
 end)
 

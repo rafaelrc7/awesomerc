@@ -8,9 +8,9 @@ end)
 
 tag.connect_signal("property::layout", function(t)
 	for _, c in pairs(t:clients()) do
-		if t.layout == awful.layout.suit.floating then
+		if t.layout == awful.layout.suit.floating and not (c.maximized or c.fullscreen) then
 			awful.titlebar.show(c)
-		elseif not c.floating then
+		else
 			awful.titlebar.hide(c)
 		end
 	end
