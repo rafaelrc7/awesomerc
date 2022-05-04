@@ -38,6 +38,12 @@ require "bindings"
 require "rules"
 require "signals"
 
-local autorun_path = string.format("%s/awesome/autorun.sh", gears.filesystem.get_configuration_dir())
-awful.spawn.with_shell(string.format([[[-e %s] && %s]], autorun_path, autorun_path))
+local ok, auto_start = pcall(require, "auto_start")
+if ok then
+	for _, cmd in ipairs(auto_start) do
+		awful.spawn.with_shell(
+			string.format("pgrep -u $USER -fx '%s' > /dev/null || (%s)", cmd, cmd)
+		)
+	end
+end
 
