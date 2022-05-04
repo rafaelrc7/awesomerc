@@ -258,7 +258,7 @@ awful.keyboard.append_global_keybindings {
 		on_press	= function(idx)
 			local screen = awful.screen.focused()
 			local tag = screen.tags[idx]
-			if tag then tag:viewtoggle(tag) end
+			if tag then awful.tag.viewtoggle(tag) end
 		end,
 	},
 	awful.key {
