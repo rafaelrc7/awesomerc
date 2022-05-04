@@ -36,17 +36,6 @@
         flameshot
       ];
 
-      xsession = {
-        enable = true;
-        windowManager.awesome = {
-          enable = true;
-          package = pkgs.awesome.overrideAttrs (old: {
-            version = "git";
-            src = awesome-git;
-          });
-        };
-      };
-
       services.picom = {
         enable = true;
         backend = "glx";
@@ -58,6 +47,19 @@
             flameshot,
           }
         '';
+      };
+    };
+
+    xsession = { pkgs, config, ... }: {
+      xsession = {
+        enable = true;
+        windowManager.awesome = {
+          enable = true;
+          package = pkgs.awesome.overrideAttrs (old: {
+            version = "git";
+            src = awesome-git;
+          });
+        };
       };
     };
 
