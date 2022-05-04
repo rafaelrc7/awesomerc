@@ -44,7 +44,7 @@
       xdg.configFile = {
         "awesome/auto_start.lua".text = with pkgs; ''
           return {
-            flameshot,
+            "${flameshot}/bin/flameshot",
           }
         '';
       };
