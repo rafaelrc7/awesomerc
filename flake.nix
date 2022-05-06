@@ -11,17 +11,10 @@
       flake = false;
       url = "github:lcpz/awesome-freedesktop";
     };
-
-    awesome-git = {
-      flake = false;
-      url = "github:awesomewm/awesome";
-    };
   };
 
-  outputs = { lain, awesome-freedesktop, awesome-git, ... }: {
-    # TODO: Set xsession awesomewm
-
-    dotfiles = { config, ... }: {
+  outputs = { lain, awesome-freedesktop, ... }: {
+    setup = { config, pkgs, ... }: {
       xdg.configFile = {
         "awesome/rc.lua".source = ./rc.lua;
         "awesome/lua".source = ./lua;
@@ -29,40 +22,20 @@
         "awesome/lain".source = lain;
         "awesome/freedesktop".source = awesome-freedesktop;
       };
-    };
-
-    autorun = { pkgs, config, ... }: {
-      home.packages = with pkgs; [
-        flameshot
-      ];
-
-      services.picom = {
-        enable = true;
-        backend = "glx";
-      };
 
       xdg.configFile = {
         "awesome/auto_start.lua".text = with pkgs; ''
           return {
             "${flameshot}/bin/flameshot",
+            "${picom}/bin/picom -b",
           }
         '';
       };
-    };
 
-    xsession = { pkgs, config, ... }: {
-      xsession = {
-        enable = true;
-        windowManager.awesome = {
-          enable = true;
-          package = pkgs.awesome.overrideAttrs (old: {
-            version = "git";
-            src = awesome-git;
-          });
-        };
+      services.picom = {
+        backend = "glx";
       };
     };
-
   };
 }
 
