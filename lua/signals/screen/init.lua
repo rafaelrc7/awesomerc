@@ -1,4 +1,5 @@
 local awful = require "awful"
+local gears = require "gears"
 local beautiful = require "beautiful"
 local wibox = require "wibox"
 
@@ -42,6 +43,16 @@ screen.connect_signal("arrange", function(s)
 		else
 			c.border_width = beautiful.border_width
 		end
+	end
+end)
+
+screen.connect_signal("property::geometry", function(s)
+	if beautiful.wallpaper then
+		local wallpaper = beautiful.wallpaper
+		if type(wallpaper) == "function" then
+			wallpaper = wallpaper(s)
+		end
+		gears.wallpaper.maximized(wallpaper, s, true)
 	end
 end)
 

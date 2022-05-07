@@ -14,7 +14,7 @@ awful.keyboard.append_global_keybindings {
 	-- AWESOME --
 
 	awful.key {
-		modifiers	= { mod.super },
+		modifiers	= { mod.alt, mod.super },
 		key			= "s",
 		description	= "show help",
 		group		= "awesome",
@@ -55,6 +55,17 @@ awful.keyboard.append_global_keybindings {
 			}
 		end,
 	},
+	awful.key {
+		modifiers	= { mod.super },
+		key			= "b",
+		description	= "toggle wibox",
+		group		= "awesome",
+		on_press	= function()
+			for s in screen do
+				s.wibox.visible = not s.wibox.visible
+			end
+		end,
+	},
 
 	-- LAUNCHER --
 
@@ -78,6 +89,20 @@ awful.keyboard.append_global_keybindings {
 		description	= "show the menubar",
 		group		= "launcher",
 		on_press	= function() menubar.show() end,
+	},
+	awful.key {
+		modifiers	= { mod.super },
+		key			= "q",
+		description	= "open web browser: " .. apps.browser,
+		group		= "launcher",
+		on_press	= function() awful.spawn(apps.browser) end,
+	},
+	awful.key {
+		modifiers	= { mod.super },
+		key			= "e",
+		description	= "open file browser: " .. apps.explorer,
+		group		= "launcher",
+		on_press	= function() awful.spawn(apps.explorer) end,
 	},
 
 	-- TAG --
@@ -296,6 +321,73 @@ awful.keyboard.append_global_keybindings {
 				tag.layout = tag.layouts[idx] or tag.layout
 			end
 		end,
+	},
+
+	-- MISC --
+	awful.key {
+		modifiers	= { },
+		key			= "Print",
+		description	= "Take screenshot",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.screenshot) end,
+	},
+	awful.key {
+		modifiers	= { mod.ctrl, mod.alt },
+		key			= "l",
+		description	= "Lock screen",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.lockscreen) end,
+	},
+	-- brightness --
+	awful.key {
+		modifiers	= { },
+		key			= "XF86MonBrightnessUp",
+		description	= "Increase screen brightness ",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.bright.inc) end,
+	},
+	awful.key {
+		modifiers	= { },
+		key			= "XF86MonBrightnessDown",
+		description	= "Decrease screen brightness ",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.bright.dec) end,
+	},
+	-- volume --
+	awful.key {
+		modifiers	= { },
+		key			= "XF86AudioRaiseVolume",
+		description	= "Increase screen brightness ",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.inc) end,
+	},
+	awful.key {
+		modifiers	= { },
+		key			= "XF86AudioLowerVolume",
+		description	= "Decrease screen brightness ",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.dec) end,
+	},
+	awful.key {
+		modifiers	= { mod.alt, mod.super },
+		key			= "Up",
+		description	= "Raise volume",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.inc) end,
+	},
+	awful.key {
+		modifiers	= { mod.alt, mod.super },
+		key			= "Down",
+		description	= "Lower volume",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.dec) end,
+	},
+	awful.key {
+		modifiers	= { mod.alt, mod.super },
+		key			= "m",
+		description	= "Toggle mute",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.mute) end,
 	},
 }
 

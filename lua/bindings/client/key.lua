@@ -58,6 +58,15 @@ client.connect_signal("request::default_keybindings", function()
 		},
 		awful.key {
 			modifiers	= { mod.super },
+			key			= "s",
+			description	= "(un)stick",
+			group		= "client",
+			on_press	= function(c)
+				c.sticky = not c.sticky
+			end,
+		},
+		awful.key {
+			modifiers	= { mod.super },
 			key			= "m",
 			description	= "(un)maximise",
 			group		= "client",
