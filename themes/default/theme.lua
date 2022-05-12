@@ -19,22 +19,22 @@ local theme = {}
 
 theme.font          = "sans 8"
 
-theme.bg_normal     = "#222222"
-theme.bg_focus      = "#535d6c"
-theme.bg_urgent     = "#ff0000"
-theme.bg_minimize   = "#444444"
+theme.bg_normal     = "#2E3440"
+theme.bg_focus      = "#4C566A"
+theme.bg_urgent     = "#BF616A"
+theme.bg_minimize   = "#434C5E"
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = "#aaaaaa"
-theme.fg_focus      = "#ffffff"
-theme.fg_urgent     = "#ffffff"
-theme.fg_minimize   = "#ffffff"
+theme.fg_normal     = "#D8DEE9"
+theme.fg_focus      = "#ECEFF4"
+theme.fg_urgent     = "#ECEFF4"
+theme.fg_minimize   = "#ECEFF4"
 
 theme.useless_gap         = dpi(5)
 theme.border_width        = dpi(2)
-theme.border_color_normal = "#000000"
-theme.border_color_active = "#535d6c"
-theme.border_color_marked = "#91231c"
+theme.border_color_normal = "#3B4252"
+theme.border_color_active = "#5E81AC"
+theme.border_color_marked = "#BF616A"
 
 theme.gap_single_client = false
 theme.fixed_outside_gap = true
