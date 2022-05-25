@@ -57,7 +57,7 @@ client.connect_signal("property::floating", function(c)
 	end
 
 	c.ontop = c.floating
-	if c.floating then
+	if c.floating and not c.requests_no_titlebar then
 		awful.titlebar.show(c)
 	else
 		awful.titlebar.hide(c)
