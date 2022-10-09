@@ -104,6 +104,11 @@ client.connect_signal("property::maximized_horizontal", function(c)
     update_spacing_by_screen(c.screen)
 end)
 
+-- When a client is (un)sticked
+client.connect_signal("property::sticky", function(c)
+    update_spacing_by_screen(c.screen)
+end)
+
 -- When a client requests a new screen, and update the old_screen while we're at it
 client.connect_signal("property::screen", function(c, old_screen)
     update_spacing_by_screen(c.screen)
