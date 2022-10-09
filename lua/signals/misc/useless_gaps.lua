@@ -32,8 +32,10 @@ local update_spacing_by_screen = function(s)
             end
         end
         -- If we reach this point, that means none of the visible clients were in a state that should prevent the negative padding from being set
-        set_outside_padding(s,
-            (-(s.selected_tag.gap*2)+beautiful.fixed_outside_gap_amount) or 0)
+        if s.selected_tag then
+			set_outside_padding(s,
+				(-(s.selected_tag.gap*2)+beautiful.fixed_outside_gap_amount) or 0)
+		end
         return true
     end
 end
