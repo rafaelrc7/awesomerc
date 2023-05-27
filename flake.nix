@@ -32,12 +32,12 @@
             screenshot = "${flameshot}/bin/flameshot gui",
             lockscreen = "${xlockmore}/bin/xlock -mode blank",
             bright = {
-              inc = "${xorg.xbacklight}/bin/xbacklight -inc 10",
-              dec = "${xorg.xbacklight}/bin/xbacklight -dec 10",
+              inc = "${brightnessctl}/bin/brightnessctl set 10%+",
+              dec = "${brightnessctl}/bin/brightnessctl set 10%-",
             },
             volume = {
-              inc = "${pamixer}/bin/pamixer -i 5",
-              dec = "${pamixer}/bin/pamixer -d 5",
+              inc = "${pamixer}/bin/pamixer -i 10",
+              dec = "${pamixer}/bin/pamixer -d 10",
               mute = "${pamixer}/bin/pamixer -t",
             },
           }

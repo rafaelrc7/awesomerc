@@ -17,47 +17,24 @@ local themes_path = gfs.get_configuration_dir() .. "/themes/"
 
 local theme = {}
 
--- Background colours
-local bg        = "#282828"
-local bg1       = "#3c3836"
-local bg_red    = "#cc241d"
-local bg_green  = "#98971a"
-local bg_yellow = "#d79921"
-local bg_blue   = "#458588"
-local bg_purple = "#b16286"
-local bg_aqua   = "#689d6a"
-local bg_gray   = "#a89984"
-local bg_orange = "#d65d0e"
-
--- Foreground colours
-local fg        = "#ebdbb2"
-local fg_red    = "#fb4934"
-local fg_green  = "#b8bb26"
-local fg_yellow = "#fabd2f"
-local fg_blue   = "#83a598"
-local fg_purple = "#d3869b"
-local fg_aqua   = "#8ec07c"
-local fg_gray   = "#928374"
-local fg_orange = "#fe8019"
-
 theme.font          = "sans 8"
 
-theme.bg_normal     = bg
-theme.bg_focus      = bg1
-theme.bg_urgent     = bg1
-theme.bg_minimize   = bg_aqua
-theme.bg_systray    = bg
+theme.bg_normal     = "#2E3440"
+theme.bg_focus      = "#4C566A"
+theme.bg_urgent     = "#BF616A"
+theme.bg_minimize   = "#434C5E"
+theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = fg
-theme.fg_focus      = fg
-theme.fg_urgent     = fg_purple
-theme.fg_minimize   = fg
+theme.fg_normal     = "#D8DEE9"
+theme.fg_focus      = "#ECEFF4"
+theme.fg_urgent     = "#ECEFF4"
+theme.fg_minimize   = "#ECEFF4"
 
 theme.useless_gap         = dpi(5)
 theme.border_width        = dpi(2)
-theme.border_normal       = bg
-theme.border_focus        = fg
-theme.border_marked       = bg_red
+theme.border_color_normal = "#3B4252"
+theme.border_color_active = "#5E81AC"
+theme.border_color_marked = "#BF616A"
 
 theme.gap_single_client = false
 theme.fixed_outside_gap = true

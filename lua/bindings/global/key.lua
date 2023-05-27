@@ -338,36 +338,46 @@ awful.keyboard.append_global_keybindings {
 		group		= "hotkeys",
 		on_press	= function() awful.spawn.with_shell(apps.lockscreen) end,
 	},
+
 	-- brightness --
 	awful.key {
 		modifiers	= { },
 		key			= "XF86MonBrightnessUp",
-		description	= "Increase screen brightness ",
+		description	= "Increase screen brightness",
 		group		= "hotkeys",
 		on_press	= function() awful.spawn.with_shell(apps.bright.inc) end,
 	},
 	awful.key {
 		modifiers	= { },
 		key			= "XF86MonBrightnessDown",
-		description	= "Decrease screen brightness ",
+		description	= "Decrease screen brightness",
 		group		= "hotkeys",
 		on_press	= function() awful.spawn.with_shell(apps.bright.dec) end,
 	},
+
 	-- volume --
 	awful.key {
 		modifiers	= { },
 		key			= "XF86AudioRaiseVolume",
-		description	= "Increase screen brightness ",
+		description	= "Raise volume",
 		group		= "hotkeys",
 		on_press	= function() awful.spawn.with_shell(apps.volume.inc) end,
 	},
 	awful.key {
 		modifiers	= { },
 		key			= "XF86AudioLowerVolume",
-		description	= "Decrease screen brightness ",
+		description	= "Lower volume",
 		group		= "hotkeys",
 		on_press	= function() awful.spawn.with_shell(apps.volume.dec) end,
 	},
+	awful.key {
+		modifiers	= { },
+		key			= "XF86AudioMute",
+		description	= "Toggle mute",
+		group		= "hotkeys",
+		on_press	= function() awful.spawn.with_shell(apps.volume.mute) end,
+	},
+
 	awful.key {
 		modifiers	= { mod.alt, mod.super },
 		key			= "Up",

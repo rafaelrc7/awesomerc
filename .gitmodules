@@ -1,0 +1,3 @@
+[submodule "themes/gruvbox"]
+	path = themes/gruvbox
+	url = https://github.com/lnus/awesome-wm-gruvbox-theme
