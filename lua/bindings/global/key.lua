@@ -36,7 +36,7 @@ awful.keyboard.append_global_keybindings {
 	},
 	awful.key {
 		modifiers	= { mod.super, mod.shift },
-		key			= "q",
+		key			= "e",
 		description	= "quit awesome",
 		group		= "awesome",
 		on_press	= awesome.quit,
